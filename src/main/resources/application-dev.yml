@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: recipe
+  webflux:
+    base-path: /recipes
+  data:
+    mongodb:
+      uri: ${MONGO_URL}
+    redis:
+      repositories:
+        enabled: false
+
+server:
+  port: 8030
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /v3/api-docs

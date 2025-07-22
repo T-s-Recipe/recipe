@@ -18,21 +18,37 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 gradle-app.setting
 bin/
+gradle.log
+
+# Kotlin compiler
+.kotlin_build/
+
+# Maven specific
+target/
 
 # Temporary files
 *.tmp
 *.swp
 *.swo
 .DS_Store
+*~
 
 # Spring Boot specific
-# Exclude environment files for security reasons
 *.env
 .env.*
+.restart/
+
+# Logs
+*.log
+logs/
+*.pid
 
 # macOS specific
 *.DS_Store
 
-# etc
-*.checksums.*
+# Editor folders
+.vscode/
+
+# Exclude local config and dockerfiles
 /src/main/resources/application-local.yml
+Dockerfile.local

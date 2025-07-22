@@ -1,4 +1,4 @@
-package com.tsrecipe.recipe
+package shop.tsrecipe.recipe
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
