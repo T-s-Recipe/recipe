@@ -1,19 +1,26 @@
 package shop.tsrecipe.recipe.api
 
+import io.swagger.v3.oas.annotations.Operation
 import shop.tsrecipe.recipe.domain.toResponse
 import shop.tsrecipe.recipe.service.RecipeService
 import shop.tsrecipe.recipe.util.baseResponse
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "Recipe", description = "Recipe APIs")
 @RequestMapping
 @RestController
 class RecipeController(
     private val recipeService: RecipeService
 ) {
+    @Operation(
+        summary = "레시피 등록",
+        description = "레시피 등록 API"
+    )
     @PostMapping
     suspend fun create(@RequestBody request: CreateRecipeRequest): ResponseEntity<RecipeResponse> {
         return baseResponse(
@@ -21,6 +28,10 @@ class RecipeController(
         )
     }
 
+    @Operation(
+        summary = "레시피 단건 조회",
+        description = "레시피 단건 조회 by recipeId"
+    )
     @GetMapping("/{recipeId}")
     suspend fun getRecipe(@PathVariable recipeId: String): ResponseEntity<RecipeResponse> {
         return baseResponse(
@@ -28,9 +39,16 @@ class RecipeController(
         )
     }
 
-    /** TODO 레시피 목록 조회 (무한스크롤 15개씩)
+    /** TODO 레시피 목록 조회 (무한스크롤)
      * 메인 화면에서 호출되는 조건 필드에 대해 index 걸어야함
      */
+    @Operation(
+        summary = "레시피 목록 조회",
+        description = """
+            # 레시피 목록 조회
+            각 파라미터 별 조건 확인 필수
+        """
+    )
     @GetMapping
     suspend fun getRecipes(
         @Parameter(description = "레시피 등록 회원 ID")
