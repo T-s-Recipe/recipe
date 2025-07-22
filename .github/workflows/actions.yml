@@ -34,7 +34,7 @@ jobs:
 
           docker build \
           --build-arg PROFILE=$TAG \
-          --build-arg MONGO_URL= ${{ secrets.MONGO_URL }} \
+          --build-arg MONGO_URL=${{ secrets.MONGO_URL }} \
           -t ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG .
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG
 
