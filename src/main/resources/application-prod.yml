@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: recipe
+  webflux:
+    base-path: /recipes
+  data:
+    mongodb:
+      uri: ${MONGO_URL}
+    redis:
+      repositories:
+        enabled: false
+
+server:
+  port: 8030
