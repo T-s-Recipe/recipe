@@ -6,6 +6,9 @@ on:
       - main
       - develop
 
+env:
+  CACHE_DIR: ${{ github.workspace }}/.cache
+
 jobs:
   build-and-deploy:
     runs-on: self-hosted
@@ -23,6 +26,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
+      - name: Create Cache Directory
+        run: mkdir -p ${{ env.CACHE_DIR }}
+
       - name: Build and push Docker image
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
@@ -32,11 +38,14 @@ jobs:
           fi
           echo "Using tag: $TAG"
 
-          docker build \
+          docker buildx build \
           --build-arg PROFILE=$TAG \
           --build-arg MONGO_URL=${{ secrets.MONGO_URL }} \
-          -t ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG .
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG
+          -t ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG \
+          --push \
+          --cache-from "type=local,src=${{ env.CACHE_DIR }}/docker" \
+          --cache-to "type=local,dest=${{ env.CACHE_DIR }}/docker,mode=max" \
+          .
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -49,5 +58,12 @@ jobs:
         run: |
           echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $KUBECONFIG_PATH
           chmod 600 $KUBECONFIG_PATH
-          kubectl --kubeconfig=$KUBECONFIG_PATH rollout restart deployment/${{ vars.DOCKER_REPO_RECIPE }}
-          kubectl --kubeconfig=$KUBECONFIG_PATH rollout status deployment/${{ vars.DOCKER_REPO_RECIPE }}
+          kubectl --kubeconfig=$KUBECONFIG_PATH rollout restart deployment/recipe
+          kubectl --kubeconfig=$KUBECONFIG_PATH rollout status deployment/recipe
+
+      - name: Clean Up Docker Resources
+        if: always()
+        run: |
+          echo "Cleaning up Docker to save disk space..."
+          docker system prune -af
+          echo "Docker cleanup complete."
