@@ -8,5 +8,8 @@ enum class ErrorCode(val httpStatus: HttpStatusCode = HttpStatus.NOT_FOUND, val 
     BAD_REQUEST(httpStatus = HttpStatus.BAD_REQUEST, message = "Bad request. check API documents."),
 
     // recipe
-    RECIPE_NOT_FOUND(message = "recipe not found.")
+    RECIPE_NOT_FOUND(message = "Recipe not found."),
+
+    // member
+    MEMBER_NOT_FOUND(message = "Member not found")
 }

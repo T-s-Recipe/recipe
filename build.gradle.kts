@@ -18,6 +18,8 @@ repositories {
 	mavenCentral()
 }
 
+extra["springCloudVersion"] = "2025.0.0"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 
@@ -25,16 +27,30 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 
+	implementation("com.playtika.reactivefeign:feign-reactor-spring-cloud-starter:4.2.1")
+	implementation("io.github.resilience4j:resilience4j-spring-boot3")
+	implementation("io.github.resilience4j:resilience4j-reactor")
+
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
+	implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+	implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+
+	runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.104.Final:osx-aarch_64")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+	}
 }
 
 kotlin {

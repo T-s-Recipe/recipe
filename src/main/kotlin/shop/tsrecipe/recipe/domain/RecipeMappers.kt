@@ -1,42 +1,68 @@
 package shop.tsrecipe.recipe.domain
 
-import shop.tsrecipe.recipe.api.IngredientResponse
-import shop.tsrecipe.recipe.api.RecipeResponse
-import shop.tsrecipe.recipe.api.SectionResponse
-import shop.tsrecipe.recipe.api.StepResponse
+import shop.tsrecipe.recipe.api.*
 
 fun Recipe.toResponse(): RecipeResponse {
     return RecipeResponse(
         id = this.id.toString(),
         authorId = this.authorId.toString(),
-        name = this.name,
+        authorNickname = this.authorNickname,
+        title = this.title,
         imageUrl = this.imageUrl,
         servings = this.servings,
         cost = this.cost,
         cookingTime = this.cookingTime,
-        ingredients = this.ingredients.map { it.toResponse() },
-        sections = this.sections.map { it.toResponse() },
-        description = this.description,
+        memo = this.memo,
+        basicIngredients = this.basicIngredients.map { it.toResponse() },
+        sourceIngredients = this.sourceIngredients.map { it.toResponse() },
+        steps = this.steps.map { it.toResponse() }
+    )
+}
+
+fun List<Recipe>.toSliceResponse(): RecipeSliceResponse {
+    val nextCursor = this.lastOrNull()
+
+    return RecipeSliceResponse(
+        resultList = this.map { it.toSimpleResponse() },
+        nextCursorId = nextCursor?.id?.toString()
+    )
+}
+
+fun Recipe.toSimpleResponse(): SimpleRecipeResponse {
+    return SimpleRecipeResponse(
+        authorId = this.authorId.toString(),
+        authorName = this.authorNickname,
+        imageUrl = this.imageUrl,
+        title = this.title,
+        servings = this.servings,
+        cost = this.cost,
+        cookingTime = this.cookingTime,
     )
 }
 
 fun Ingredient.toResponse(): IngredientResponse {
     return IngredientResponse(
         name = this.name,
+        measurements = this.measurements.map { it.toResponse() }
+    )
+}
+
+fun Measurement.toResponse(): MeasurementResponse {
+    return MeasurementResponse(
         amount = this.amount,
         unit = this.unit.value
     )
 }
 
-fun Section.toResponse(): SectionResponse {
-    return SectionResponse(
+fun Step.toResponse(): StepResponse {
+    return StepResponse(
         title = this.title,
-        steps = this.steps.map { it.toResponse() },
+        steps = this.processes.map { it.toResponse() },
     )
 }
 
-fun Step.toResponse(): StepResponse {
-    return StepResponse(
+fun Process.toResponse(): ProcessResponse {
+    return ProcessResponse(
         content = this.content,
         imageUrl = this.imageUrl,
     )
