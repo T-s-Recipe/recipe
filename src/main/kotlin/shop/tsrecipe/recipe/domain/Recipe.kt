@@ -7,38 +7,46 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = "recipes")
 data class Recipe(
     @Id
-    val id: ObjectId = ObjectId.get(),
+    val id: ObjectId? = null,
     val authorId: ObjectId,
-    val name: String,
+    val authorNickname: String,
+    val title: String,
     val imageUrl: String,
     val servings: Int,
-    val cost: Int,
-    val cookingTime: Int,
-    val ingredients: List<Ingredient> = emptyList(),
-    val sections: List<Section> = emptyList(),
-    val description: String?
+    val cost: Int? = null,
+    val memo: String? = null,
+    val cookingTime: Int? = null,
+    val basicIngredients: List<Ingredient> = emptyList(),
+    val sourceIngredients: List<Ingredient> = emptyList(),
+    val steps: List<Step> = emptyList()
 ): Auditable()
 
 data class Ingredient(
     val name: String,
+    val measurements: List<Measurement>
+)
+
+data class Measurement(
     val amount: Int,
     val unit: IngredientUnit
 )
 
 enum class IngredientUnit(val value: String) {
-    COUNT("개"),
     GRAM("g"),
     MILLILITER("ml"),
-    TABLESPOON("T"),
-    TEASPOON("t")
+    TABLESPOON("Tbsp"),
+    TEASPOON("tsp"),
+    CUP("cup"),
+    OZ("oz"),
+    QUANTITY("Qty")
 }
 
-data class Section(
+data class Step(
     val title: String,
-    val steps: List<Step>
+    val processes: List<Process>
 )
 
-data class Step(
+data class Process(
     val content: String,
-    val imageUrl: String
+    val imageUrl: String?
 )

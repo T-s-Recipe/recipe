@@ -13,14 +13,16 @@ class RecipeManager(
         return recipeRepository.save(
             Recipe(
                 authorId = command.authorId,
-                name = command.name,
+                authorNickname = command.authorNickname!!,
+                title = command.title,
                 imageUrl = command.imageUrl,
                 servings = command.servings,
                 cost = command.cost,
                 cookingTime = command.cookingTime,
-                ingredients = command.ingredients.map { it.toEntity() },
-                sections = command.sections.map { it.toEntity() },
-                description = command.description,
+                memo = command.memo,
+                basicIngredients = command.basicIngredients.map { it.toEntity() },
+                sourceIngredients = command.sourceIngredients.map { it.toEntity() },
+                steps = command.steps.map { it.toEntity() }
             )
         ).awaitSingle()
     }

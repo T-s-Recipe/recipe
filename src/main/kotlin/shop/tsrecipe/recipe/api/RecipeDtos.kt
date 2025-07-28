@@ -1,104 +1,109 @@
 package shop.tsrecipe.recipe.api
 
-import shop.tsrecipe.recipe.domain.IngredientUnit
-import shop.tsrecipe.recipe.service.CreateRecipeCommand
-import shop.tsrecipe.recipe.service.IngredientInfo
-import shop.tsrecipe.recipe.service.SectionInfo
-import shop.tsrecipe.recipe.service.StepInfo
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.Positive
 import org.bson.types.ObjectId
+import shop.tsrecipe.recipe.domain.IngredientUnit
+import shop.tsrecipe.recipe.service.*
 
 @Schema(description = "레시피 등록 RequestDTO")
 data class CreateRecipeRequest(
     @field:Schema(description = "레시피 등록 회원 ID")
     val authorId: String,
 
-    @field:Schema(description = "요리 이름")
-    val name: String,
+    @field:Schema(description = "레시피 제목")
+    val title: String,
 
     @field:Schema(description = "이미지 URL")
     val imageUrl: String,
 
-    @field:Schema(description = "용량")
-    val servings: Int,
+    @field:Schema(description = "용량 (defaultValue: 4)")
+    val servings: Int = 4,
 
     @field:Schema(description = "비용")
-    val cost: Int,
+    val cost: Int? = null,
 
     @field:Schema(description = "소요 시간 (분)")
-    val cookingTime: Int,
+    val cookingTime: Int? = null,
 
-    @field:Schema(description = "재료 목록")
-    val ingredients: List<IngredientRequest>,
+    @field:Schema(description = "메모")
+    val memo: String? = null,
+
+    @field:Schema(description = "기본 재료")
+    val basicIngredients: List<IngredientRequest>,
+
+    @field:Schema(description = "소스 재료")
+    val sourceIngredients: List<IngredientRequest>,
 
     @field:Schema(description = "요리 단계 목록")
-    val sections: List<SectionRequest>,
-
-    @field:Schema(description = "설명")
-    val description: String?
+    val steps: List<StepRequest>,
 ) {
     fun toCommand(): CreateRecipeCommand {
         return CreateRecipeCommand(
             authorId = ObjectId(this.authorId),
-            name = this.name,
+            title = this.title,
             imageUrl = this.imageUrl,
             servings = this.servings,
             cost = this.cost,
             cookingTime = this.cookingTime,
-            ingredients = this.ingredients.map { it.toCommandInfo() },
-            sections = this.sections.map { it.toCommandInfo() },
-            description = this.description,
+            memo = this.memo,
+            basicIngredients = this.basicIngredients.map { it.toCommandInfo() },
+            sourceIngredients = this.sourceIngredients.map { it.toCommandInfo() },
+            steps = this.steps.map { it.toCommandInfo() }
         )
     }
 
-    @Schema(description = "재료 RequestDTO")
+    @Schema(description = "기본 재료 RequestDTO")
     data class IngredientRequest(
         @field:Schema(description = "재료 이름")
         val name: String,
 
-        @field:Schema(description = "양")
-        val amount: Int,
-
-        @field:Schema(description = "단위 (COUNT / GRAM / MILLILITER / TABLESPOON / TEASPOON)")
-        val unit: IngredientUnit
+        @field:Schema(description = "재료 용량 상세")
+        val measurements: List<MeasurementRequest>
     ) {
         fun toCommandInfo(): IngredientInfo {
             return IngredientInfo(
                 name = this.name,
-                amount = this.amount,
-                unit = this.unit
+                measurements = this.measurements.map { MeasurementInfo(it.amount, it.unit) }
             )
         }
     }
 
-    @Schema(description = "요리 단계 RequestDTO")
-    data class SectionRequest(
-        @field:Schema(description = "단계 이름")
+    data class MeasurementRequest(
+        @field:Schema(description = "양")
+        val amount: Int,
+
+        @field:Schema(description = "단위 (QUANTITY / GRAM / / MILLILITER / TABLESPOON / TEASPOON / CUP / OZ")
+        val unit: IngredientUnit
+    )
+
+    @Schema(description = "레시피 Step RequestDTO")
+    data class StepRequest(
+        @field:Schema(description = "제목")
         val title: String,
 
-        @field:Schema(description = "요리 과정 목록")
-        val steps: List<StepRequest>,
-    ) {
-        fun toCommandInfo(): SectionInfo {
-            return SectionInfo(
-                title = this.title,
-                steps = this.steps.map { it.toCommandInfo() }
-            )
-        }
-    }
-
-    @Schema(description = "요리 과정 RequestDTO")
-    data class StepRequest(
-        @field:Schema(description = "요리 과정 내용")
-        val content: String,
-
-        @field:Schema(description = "이미지 URL")
-        val imageUrl: String
+        @field:Schema(description = "상세 과정 목록")
+        val process: List<ProcessRequest>,
     ) {
         fun toCommandInfo(): StepInfo {
             return StepInfo(
+                title = this.title,
+                steps = this.process.map { it.toCommandInfo() }
+            )
+        }
+    }
+
+    @Schema(description = "레시피 Step 상세 과정")
+    data class ProcessRequest(
+        @field:Schema(description = "과정 내용")
+        val content: String,
+
+        @field:Schema(description = "이미지 URL")
+        val imageUrl: String? = null
+    ) {
+        fun toCommandInfo(): ProcessInfo {
+            return ProcessInfo(
                 content = this.content,
                 imageUrl = this.imageUrl
             )
@@ -114,8 +119,11 @@ data class RecipeResponse(
     @field:Schema(description = "레시피 등록 회원 ID")
     val authorId: String,
 
-    @field:Schema(description = "요리 이름")
-    val name: String,
+    @field:Schema(description = "레시피 등록 회원 닉네임")
+    val authorNickname: String,
+
+    @field:Schema(description = "레시피 제목")
+    val title: String,
 
     @field:Schema(description = "이미지 URL")
     val imageUrl: String,
@@ -124,59 +132,58 @@ data class RecipeResponse(
     val servings: Int,
 
     @field:Schema(description = "비용")
-    val cost: Int,
+    val cost: Int?,
 
     @field:Schema(description = "소요 시간 (분)")
-    val cookingTime: Int,
+    val cookingTime: Int?,
 
-    @field:Schema(description = "재료 목록")
-    val ingredients: List<IngredientResponse>,
+    @field:Schema(description = "메모")
+    val memo: String?,
 
-    @field:Schema(description = "요리 단계 목록")
-    val sections: List<SectionResponse>,
+    @field:Schema(description = "기본 재료 목록")
+    val basicIngredients: List<IngredientResponse>,
 
-    @field:Schema(description = "설명")
-    val description: String?
+    @field:Schema(description = "소스 재료 목록")
+    val sourceIngredients: List<IngredientResponse>,
+
+    @field:Schema(description = "레시피 Step 목록")
+    val steps: List<StepResponse>
 )
 
-@Schema(description = "재료 ResponseDTO")
+@Schema(description = "기본 재료 ResponseDTO")
 data class IngredientResponse(
-    @field:Schema(description = "재료 이름")
+    @field:Schema(description = "이름")
     val name: String,
 
+    @field:Schema(description = "재료 양 상세 목록")
+    val measurements: List<MeasurementResponse>
+)
+
+@Schema(description = "재료 양 상세 ResponseDTO")
+data class MeasurementResponse(
     @field:Schema(description = "양")
     val amount: Int,
 
-    @field:Schema(description = """
-        재료의 단위를 나타냅니다.
-        **(우측 문자열로 응답)**
-        
-        * `COUNT`: 개
-        * `GRAM`: 그램 (g)
-        * `MILLILITER`: 밀리리터 (ml)
-        * `TABLESPOON`: 큰술 (T)
-        * `TEASPOON`: 작은술 (t)
-        
-        """)
+    @field:Schema(description = "단위")
     val unit: String
 )
 
-@Schema(description = "요리 단계 ResponseDTO")
-data class SectionResponse(
-    @field:Schema(description = "단계 이름")
+@Schema(description = "레시피 Step ResponseDTO")
+data class StepResponse(
+    @field:Schema(description = "제목")
     val title: String,
 
-    @field:Schema(description = "요리 과정 목록")
-    val steps: List<StepResponse>,
+    @field:Schema(description = "상세 과정 목록")
+    val steps: List<ProcessResponse>,
 )
 
-@Schema(description = "요리 과정 ResponseDTO")
-data class StepResponse(
-    @field:Schema(description = "요리 과정 내용")
+@Schema(description = "레시피 Step 과정 ResponseDTO")
+data class ProcessResponse(
+    @field:Schema(description = "내용")
     val content: String,
 
     @field:Schema(description = "이미지 URL")
-    val imageUrl: String
+    val imageUrl: String?
 )
 
 @Schema(description = "레시피 검색 상세 조건")
@@ -200,4 +207,37 @@ data class RecipeSearchCondition(
     @field:Positive(message = "조리 시간은 양수여야 합니다.")
     @field:Schema(description = "조리 시간 최대 조건 (<=)")
     val cookingTimeLte: Int?,
+)
+
+@Schema(description = "레시피 목록 ResponseDTO with cursor")
+data class RecipeSliceResponse(
+    @field:Schema(description = "레시피 목록")
+    val resultList: List<SimpleRecipeResponse>,
+
+    @field:Schema(description = "다음 커서 ID")
+    val nextCursorId: String? = null
+)
+
+@Schema(description = "레시피 기본 정보 ResponseDTO")
+data class SimpleRecipeResponse(
+    @field:Schema(description = "레시피 등록 회원 ID")
+    val authorId: String,
+
+    @field:Schema(description = "레시피 등록 회원 닉네임")
+    val authorName: String,
+
+    @field:Schema(description = "레시피 제목")
+    val title: String,
+
+    @field:Schema(description = "이미지 URL")
+    val imageUrl: String,
+
+    @field:Schema(description = "용량")
+    val servings: Int,
+
+    @field:Schema(description = "비용")
+    val cost: Int?,
+
+    @field:Schema(description = "소요 시간 (분)")
+    val cookingTime: Int?
 )

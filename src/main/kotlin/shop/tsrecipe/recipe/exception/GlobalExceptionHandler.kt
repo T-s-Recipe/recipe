@@ -1,6 +1,5 @@
 package shop.tsrecipe.recipe.exception
 
-import com.orca.match.exception.ErrorResponse
 import shop.tsrecipe.recipe.util.baseResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
