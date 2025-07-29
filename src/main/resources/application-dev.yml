@@ -1,4 +1,6 @@
 spring:
+  webflux:
+    base-path: /recipes
   application:
     name: recipe
   data:
@@ -19,4 +21,17 @@ springdoc:
     url: /v3/api-docs
 
 external-service-url:
-  member: "http://localhost:8020"
+  member: "http://member"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      member-service:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        ignore-exceptions:
+          - shop.tsrecipe.recipe.exception.BaseException
