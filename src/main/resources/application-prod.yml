@@ -1,4 +1,6 @@
 spring:
+  webflux:
+    base-path: /recipes
   application:
     name: recipe
   data:
@@ -18,4 +20,4 @@ springdoc:
     enabled: false
 
 external-service-url:
-  member: "http://localhost:8020"
+  member: "http://member"
