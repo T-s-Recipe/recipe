@@ -21,7 +21,7 @@ springdoc:
     url: /v3/api-docs
 
 external-service-url:
-  member: "http://member"
+  member: "http://member/members"
 
 resilience4j:
   circuitbreaker:
@@ -35,3 +35,9 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
         ignore-exceptions:
           - shop.tsrecipe.recipe.exception.BaseException
+
+aws:
+  access-key: ${AWS_ACCESS_KEY}
+  secret-key: ${AWS_SECRET_KEY}
+  region: ${AWS_REGION}
+  bucketName: ${AWS_S3_BUCKET_NAME}
