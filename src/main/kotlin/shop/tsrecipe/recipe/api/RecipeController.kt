@@ -1,11 +1,11 @@
 package shop.tsrecipe.recipe.api
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.validation.Valid
 import org.bson.types.ObjectId
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 import shop.tsrecipe.recipe.domain.toResponse
 import shop.tsrecipe.recipe.domain.toSliceResponse
@@ -22,10 +22,13 @@ class RecipeController(
         summary = "레시피 등록",
         description = "레시피 등록 API"
     )
-    @PostMapping
-    suspend fun generate(@RequestBody request: CreateRecipeRequest): ResponseEntity<RecipeResponse> {
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun generate(
+        @RequestPart request: CreateRecipeRequest,
+        @RequestPart imageFile: FilePart
+    ): ResponseEntity<RecipeResponse> {
         return baseResponse(
-            body = recipeService.create(request.toCommand()).toResponse()
+            body = recipeService.create(imageFile = imageFile, command = request.toCommand()).toResponse()
         )
     }
 

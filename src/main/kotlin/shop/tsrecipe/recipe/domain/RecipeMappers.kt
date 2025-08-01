@@ -63,7 +63,6 @@ fun Step.toResponse(): StepResponse {
 
 fun Process.toResponse(): ProcessResponse {
     return ProcessResponse(
-        content = this.content,
-        imageUrl = this.imageUrl,
+        content = this.content
     )
 }

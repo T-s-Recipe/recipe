@@ -46,7 +46,7 @@ data class Step(
     val processes: List<Process>
 )
 
+// TODO 이미지 추가될 수도
 data class Process(
     val content: String,
-    val imageUrl: String?
 )

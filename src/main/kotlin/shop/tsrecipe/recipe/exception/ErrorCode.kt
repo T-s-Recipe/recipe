@@ -9,7 +9,11 @@ enum class ErrorCode(val httpStatus: HttpStatusCode = HttpStatus.NOT_FOUND, val 
 
     // recipe
     RECIPE_NOT_FOUND(message = "Recipe not found."),
+    RECIPE_CREATE_FAILED(httpStatus = HttpStatus.INTERNAL_SERVER_ERROR, message = "Recipe create failed."),
 
     // member
-    MEMBER_NOT_FOUND(message = "Member not found")
+    MEMBER_NOT_FOUND(message = "Member not found"),
+
+    // external
+    FILE_UPLOAD_FAILED(httpStatus = HttpStatus.INTERNAL_SERVER_ERROR, message = "File upload failed."),
 }
