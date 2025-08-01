@@ -32,6 +32,10 @@ jobs:
           docker build \
           --build-arg PROFILE=$TAG \
           --build-arg MONGO_URL=${{ secrets.MONGO_URL }} \
+          --build-arg AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+          --build-arg AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+          --build-arg AWS_REGION=${{ secrets.AWS_REGION }} \
+          --build-arg AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
           -t ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG \
           .
           
