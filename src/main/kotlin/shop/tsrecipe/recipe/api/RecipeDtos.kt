@@ -15,9 +15,6 @@ data class CreateRecipeRequest(
     @field:Schema(description = "레시피 제목")
     val title: String,
 
-    @field:Schema(description = "이미지 URL")
-    val imageUrl: String,
-
     @field:Schema(description = "용량 (defaultValue: 4)")
     val servings: Int = 4,
 
@@ -43,7 +40,6 @@ data class CreateRecipeRequest(
         return CreateRecipeCommand(
             authorId = ObjectId(this.authorId),
             title = this.title,
-            imageUrl = this.imageUrl,
             servings = this.servings,
             cost = this.cost,
             cookingTime = this.cookingTime,
@@ -97,15 +93,11 @@ data class CreateRecipeRequest(
     @Schema(description = "레시피 Step 상세 과정")
     data class ProcessRequest(
         @field:Schema(description = "과정 내용")
-        val content: String,
-
-        @field:Schema(description = "이미지 URL")
-        val imageUrl: String? = null
+        val content: String
     ) {
         fun toCommandInfo(): ProcessInfo {
             return ProcessInfo(
-                content = this.content,
-                imageUrl = this.imageUrl
+                content = this.content
             )
         }
     }
@@ -180,10 +172,7 @@ data class StepResponse(
 @Schema(description = "레시피 Step 과정 ResponseDTO")
 data class ProcessResponse(
     @field:Schema(description = "내용")
-    val content: String,
-
-    @field:Schema(description = "이미지 URL")
-    val imageUrl: String?
+    val content: String
 )
 
 @Schema(description = "레시피 검색 상세 조건")

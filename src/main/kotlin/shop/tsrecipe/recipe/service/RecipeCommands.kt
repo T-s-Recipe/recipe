@@ -7,7 +7,7 @@ data class CreateRecipeCommand(
     val authorId: ObjectId,
     var authorNickname: String? = null,
     val title: String,
-    val imageUrl: String,
+    var imageUrl: String? = null,
     val servings: Int,
     val cost: Int?,
     val cookingTime: Int?,
@@ -18,6 +18,10 @@ data class CreateRecipeCommand(
 ) {
     fun setNickname(nickname: String) {
         this.authorNickname = nickname
+    }
+
+    fun setImage(url: String) {
+        this.imageUrl = url
     }
 }
 
@@ -55,13 +59,11 @@ data class StepInfo(
 }
 
 data class ProcessInfo(
-    val content: String,
-    val imageUrl: String?
+    val content: String
 ) {
     fun toEntity(): Process {
         return Process(
-            content = content,
-            imageUrl = imageUrl
+            content = content
         )
     }
 }

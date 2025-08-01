@@ -39,6 +39,10 @@ dependencies {
 	implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 	implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
+	implementation(platform("software.amazon.awssdk:bom:2.20.26"))
+	implementation("software.amazon.awssdk:s3")
+	implementation("software.amazon.awssdk:netty-nio-client")
+
 	runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.104.Final:osx-aarch_64")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
