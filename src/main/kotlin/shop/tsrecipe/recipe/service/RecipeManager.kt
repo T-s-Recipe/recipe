@@ -15,7 +15,7 @@ class RecipeManager(
                 authorId = command.authorId,
                 authorNickname = command.authorNickname!!,
                 title = command.title,
-                imageUrl = command.imageUrl!!,
+                imageUrl = command.imageUrl,
                 servings = command.servings,
                 cost = command.cost,
                 cookingTime = command.cookingTime,

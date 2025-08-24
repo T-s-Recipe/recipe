@@ -1,7 +1,9 @@
 package shop.tsrecipe.recipe.external
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -20,12 +22,16 @@ class S3Service(
     @Value("\${aws.bucketName}") private val bucketName: String
 ) {
     suspend fun upload(file: FilePart): String {
-        val tempFile: Path = Files.createTempFile("s3-upload-", file.filename())
+        val tempFile: Path = withContext(Dispatchers.IO) {
+            Files.createTempFile("s3-upload-", file.filename())
+        }
 
         try {
             file.transferTo(tempFile).awaitFirstOrNull()
 
-            val fileLength = Files.size(tempFile)
+            val fileLength = withContext(Dispatchers.IO) {
+                Files.size(tempFile)
+            }
 
             val sanitizedFilename = file.filename().sanitizeFileName()
             val fileKey = "${UUID.randomUUID()}-${sanitizedFilename}"
@@ -45,7 +51,9 @@ class S3Service(
 
         } finally {
             try {
-                Files.deleteIfExists(tempFile)
+                withContext(Dispatchers.IO) {
+                    Files.deleteIfExists(tempFile)
+                }
             } catch (e: Exception) {
                 throw BaseException(ErrorCode.FILE_UPLOAD_FAILED)
             }
