@@ -15,6 +15,9 @@ data class CreateRecipeRequest(
     @field:Schema(description = "레시피 제목")
     val title: String,
 
+    @field:Schema(description = "이미지 URL")
+    val imageUrl: String,
+
     @field:Schema(description = "용량 (defaultValue: 4)")
     val servings: Int = 4,
 
@@ -40,6 +43,7 @@ data class CreateRecipeRequest(
         return CreateRecipeCommand(
             authorId = ObjectId(this.authorId),
             title = this.title,
+            imageUrl = this.imageUrl,
             servings = this.servings,
             cost = this.cost,
             cookingTime = this.cookingTime,
@@ -178,24 +182,20 @@ data class ProcessResponse(
 @Schema(description = "레시피 검색 상세 조건")
 data class RecipeSearchCondition(
     @field:Min(value = 0, message = "비용은 0 이상이어야 합니다.")
-    @field:Schema(description = "비용 동등 조건(==)")
-    val costEq: Int?,
+    @field:Schema(description = "최소 비용")
+    val costGte: Int? = null,
 
-    @field:Min(value = 0, message = "최소 비용은 0 이상이어야 합니다.")
-    @field:Schema(description = "비용 최소 조건 (>=)")
-    val costGte: Int?,
-
-    @field:Min(value = 0, message = "최대 비용은 0 이상이어야 합니다.")
-    @field:Schema(description = "비용 최대 조건 (<=)")
-    val costLte: Int?,
+    @field:Min(value = 0, message = "비용은 0 이상이어야 합니다.")
+    @field:Schema(description = "최대 비용")
+    val costLte: Int? = null,
 
     @field:Positive(message = "조리 시간은 양수여야 합니다.")
-    @field:Schema(description = "조리 시간 최소 조건 (>=)")
-    val cookingTimeGte: Int?,
+    @field:Schema(description = "최소 조리 시간")
+    val cookingTimeGte: Int? = null,
 
     @field:Positive(message = "조리 시간은 양수여야 합니다.")
-    @field:Schema(description = "조리 시간 최대 조건 (<=)")
-    val cookingTimeLte: Int?,
+    @field:Schema(description = "최대 조리 시간")
+    val cookingTimeLte: Int? = null,
 )
 
 @Schema(description = "레시피 목록 ResponseDTO with cursor")

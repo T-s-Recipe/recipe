@@ -1,7 +1,9 @@
 package shop.tsrecipe.recipe.api
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.bson.types.ObjectId
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -9,6 +11,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 import shop.tsrecipe.recipe.domain.toResponse
 import shop.tsrecipe.recipe.domain.toSliceResponse
+import shop.tsrecipe.recipe.external.S3Service
 import shop.tsrecipe.recipe.service.RecipeService
 import shop.tsrecipe.recipe.util.baseResponse
 
@@ -16,19 +19,30 @@ import shop.tsrecipe.recipe.util.baseResponse
 @RequestMapping
 @RestController
 class RecipeController(
-    private val recipeService: RecipeService
+    private val recipeService: RecipeService,
+    private val s3Service: S3Service
 ) {
     @Operation(
         summary = "레시피 등록",
         description = "레시피 등록 API"
     )
-    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping
     suspend fun generate(
-        @RequestPart request: CreateRecipeRequest,
-        @RequestPart imageFile: FilePart
+        @RequestBody request: CreateRecipeRequest
     ): ResponseEntity<RecipeResponse> {
         return baseResponse(
-            body = recipeService.create(imageFile = imageFile, command = request.toCommand()).toResponse()
+            body = recipeService.create(command = request.toCommand()).toResponse()
+        )
+    }
+
+    @Operation(
+        summary = "이미지 업로드",
+        description = "이미지 파일을 S3 서비스에 업로드"
+    )
+    @PostMapping(value = ["/image-upload"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun uploadImage(@RequestPart imageFile: FilePart): ResponseEntity<String> {
+        return baseResponse(
+            body = s3Service.upload(imageFile)
         )
     }
 
@@ -58,15 +72,15 @@ class RecipeController(
     }
 
 //    @Operation(
-//        summary = "레시피 목록 조회",
+//        summary = "레시피 조건 검색",
 //        description = """
-//            # 레시피 목록 조회
-//            각 파라미터 별 조건 확인 필수
+//            # 레시피 조건 검색
+//            - 각 파라미터 별 조건 확인 필수
 //        """
 //    )
 //    @GetMapping
 //    suspend fun getRecipes(
-//        @Parameter(description = "레시피 등록 회원 ID")
+//        @Parameter(description = "레시피를 등록한 Member ID")
 //        @RequestParam authorId: String?,
 //
 //        @Parameter(description = "검색 키워드 (레시피 이름)")

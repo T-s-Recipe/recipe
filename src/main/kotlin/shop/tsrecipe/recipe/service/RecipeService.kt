@@ -1,48 +1,31 @@
 package shop.tsrecipe.recipe.service
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import org.bson.types.ObjectId
-import org.springframework.http.codec.multipart.FilePart
 import shop.tsrecipe.recipe.domain.Recipe
 import shop.tsrecipe.recipe.exception.BaseException
 import shop.tsrecipe.recipe.exception.ErrorCode
 import org.springframework.stereotype.Service
-import shop.tsrecipe.recipe.external.S3Service
+import shop.tsrecipe.recipe.external.member.MemberResponse
 import shop.tsrecipe.recipe.external.member.MemberService
-import java.lang.Exception
 
 @Service
 class RecipeService(
     private val recipeManager: RecipeManager,
     private val recipeReader: RecipeReader,
-    private val memberService: MemberService,
-    private val s3Service: S3Service
+    private val memberService: MemberService
 ) {
     suspend fun create(
-        imageFile: FilePart,
         command: CreateRecipeCommand
     ): Recipe {
-        return try {
-            coroutineScope {
-                launch { setAuthorInfoIsMember(command) }
-                val thumbnailDeferred = async { s3Service.upload(imageFile) }
-                val thumbnailUrl = thumbnailDeferred.await()
+        val member = getMember(command.authorId.toString()) ?: throw BaseException(ErrorCode.MEMBER_NOT_FOUND)
 
-                command.setImage(thumbnailUrl)
+        command.setNickname(member.nickname)
 
-                recipeManager.create(command)
-            }
-        } catch (e: Exception) {
-            throw BaseException(ErrorCode.RECIPE_CREATE_FAILED)
-        }
+        return recipeManager.create(command)
     }
 
-    private suspend fun setAuthorInfoIsMember(command: CreateRecipeCommand) {
-        val member = memberService.getMemberById(command.authorId.toString())
-            ?: throw BaseException(ErrorCode.MEMBER_NOT_FOUND)
-        command.setNickname(member.nickname)
+    private suspend fun getMember(authorId: String): MemberResponse? {
+        return memberService.getMemberById(authorId)
     }
 
     suspend fun getRecipe(recipeId: ObjectId): Recipe {
