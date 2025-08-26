@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recipe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recipe
+  template:
+    metadata:
+      labels:
+        app: recipe
+    spec:
+      containers:
+        - name: recipe
+          image: jh5253/tsrecipe-recipe:initial
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8030
+          envFrom:
+            - secretRef:
+                name: recipe-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recipe
+spec:
+  selector:
+    app: recipe
+  ports:
+    - protocol: TCP
+      port: 8030
+      targetPort: 8030
+  type: ClusterIP
