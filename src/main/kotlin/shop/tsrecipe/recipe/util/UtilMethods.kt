@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 fun getCurrentTimestamp(): String {
     return LocalDateTime.now()
@@ -20,4 +21,8 @@ fun <T> baseResponse(status: HttpStatusCode = HttpStatus.OK, body: T): ResponseE
 
 fun buildQueryById(id: ObjectId): Query {
     return Query(Criteria.where("_id").`is`(id))
+}
+
+fun String.toTitleCase(locale: Locale = Locale.ENGLISH): String {
+    return if (this.isEmpty()) this else this.lowercase(locale).replaceFirstChar { it.titlecase(locale) }
 }

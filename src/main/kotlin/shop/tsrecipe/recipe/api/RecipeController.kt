@@ -13,6 +13,7 @@ import shop.tsrecipe.recipe.domain.toResponse
 import shop.tsrecipe.recipe.domain.toSliceResponse
 import shop.tsrecipe.recipe.external.S3Service
 import shop.tsrecipe.recipe.service.RecipeService
+import shop.tsrecipe.recipe.service.SearchRecipeCommand
 import shop.tsrecipe.recipe.util.baseResponse
 
 @Tag(name = "Recipe", description = "Recipe APIs")
@@ -71,23 +72,45 @@ class RecipeController(
         )
     }
 
-//    @Operation(
-//        summary = "레시피 조건 검색",
-//        description = """
-//            # 레시피 조건 검색
-//            - 각 파라미터 별 조건 확인 필수
-//        """
-//    )
-//    @GetMapping
-//    suspend fun getRecipes(
-//        @Parameter(description = "레시피를 등록한 Member ID")
-//        @RequestParam authorId: String?,
-//
-//        @Parameter(description = "검색 키워드 (레시피 이름)")
-//        @RequestParam keyword: String?,
-//
-//        @Valid condition: RecipeSearchCondition
-//    ) {
-//
-//    }
+    @Operation(
+        summary = "레시피 조건 검색",
+        description = """
+            # 레시피 조건 검색
+            - 각 파라미터 별 조건 확인 필수
+        """
+    )
+    @GetMapping
+    suspend fun getRecipes(
+        @Parameter(description = "레시피 작성자 Member ID")
+        @RequestParam(required = false) authorId: String? = null,
+
+        @Parameter(description = "등록한 Member 닉네임")
+        @RequestParam(required = false) nickname: String? = null,
+
+        @Parameter(description = "레시피 검색 키워드")
+        @RequestParam(required = false) searchKeyword: String? = null,
+
+        @Parameter(description = "레시피 검색 필터")
+        @Valid filter: RecipeSearchFilter? = null,
+
+        @RequestParam(required = false) limit: Int = 15,
+
+        @RequestParam(required = false) cursorId: String? = null
+    ): ResponseEntity<RecipeSliceResponse> {
+        return baseResponse(
+            body = recipeService.getRecipes(
+                SearchRecipeCommand(
+                    authorId = authorId?.let { ObjectId(it) },
+                    nickname = nickname,
+                    searchKeyword = searchKeyword,
+                    costGte = filter?.costGte,
+                    costLte = filter?.costLte,
+                    cookingTimeGte = filter?.cookingTimeGte,
+                    cookingTimeLte = filter?.cookingTimeLte,
+                    limit = limit,
+                    cursorId = cursorId?.let { ObjectId(it) }
+                )
+            ).toSliceResponse()
+        )
+    }
 }

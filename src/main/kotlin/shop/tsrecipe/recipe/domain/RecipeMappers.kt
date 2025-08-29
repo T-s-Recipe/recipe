@@ -1,13 +1,14 @@
 package shop.tsrecipe.recipe.domain
 
 import shop.tsrecipe.recipe.api.*
+import shop.tsrecipe.recipe.util.toTitleCase
 
 fun Recipe.toResponse(): RecipeResponse {
     return RecipeResponse(
         id = this.id.toString(),
         authorId = this.authorId.toString(),
         authorNickname = this.authorNickname,
-        title = this.title,
+        title = this.title.toTitleCase(),
         imageUrl = this.imageUrl,
         servings = this.servings,
         cost = this.cost,
@@ -42,7 +43,7 @@ fun Recipe.toSimpleResponse(): SimpleRecipeResponse {
 
 fun Ingredient.toResponse(): IngredientResponse {
     return IngredientResponse(
-        name = this.name,
+        name = this.name.toTitleCase(),
         measurements = this.measurements.map { it.toResponse() }
     )
 }

@@ -19,7 +19,7 @@ data class Recipe(
     val basicIngredients: List<Ingredient> = emptyList(),
     val sourceIngredients: List<Ingredient> = emptyList(),
     val steps: List<Step> = emptyList()
-): Auditable()
+) : Auditable()
 
 data class Ingredient(
     val name: String,
