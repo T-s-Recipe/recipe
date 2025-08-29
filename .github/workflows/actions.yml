@@ -48,7 +48,7 @@ jobs:
             PROFILE="dev"
           fi
           
-          sed -e "s|__PROFILE|$PROFILE|g" \
+          sed -e "s|__PROFILE__|$PROFILE|g" \
               -e "s|__MONGO_URL|${{ secrets.PROFILE }}|g" \
               -e "s|__AWS_ACCESS_KEY|${{ secrets.MONGO_URL }}|g" \
               -e "s|__AWS_SECRET_KEY|${{ secrets.AWS_ACCESS_KEY }}|g" \
