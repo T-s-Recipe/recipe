@@ -9,6 +9,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.TextCriteria
+import org.springframework.data.mongodb.core.query.TextQuery
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -24,16 +26,38 @@ class RecipeReader(
 
     suspend fun findAllByCursor(command: GetRecentCommand): List<Recipe> {
         val query = Query()
-        command.cursorId?.let {
-            query.addCriteria(Criteria.where("_id").lt(it))
-        }
 
-        query.with(Sort.by(Sort.Direction.DESC, "_id"))
-            .limit(command.limit)
+        query.addPagingOptions(command.cursorId, command.limit)
 
         return reactiveMongoTemplate.find(
             query,
             Recipe::class.java
         ).collectList().awaitSingle().toList()
+    }
+
+    private suspend fun Query.addPagingOptions(cursorId: ObjectId?, limit: Int) {
+        apply {
+            cursorId?.let {
+                this.addCriteria(Criteria.where("_id").lt(it))
+            }
+
+            with(Sort.by(Sort.Direction.DESC, "_id"))
+                .limit(limit)
+        }
+    }
+
+    suspend fun findAllBySearchConditions(command: SearchRecipeCommand): List<Recipe> {
+        val query = if (!command.searchKeyword.isNullOrBlank()) {
+            val textCriteria = TextCriteria.forDefaultLanguage().matching(command.searchKeyword)
+            TextQuery.query(textCriteria).with(Sort.by(Sort.Direction.DESC, "score"))
+        } else Query()
+
+        command.toCriteria()?.let { query.addCriteria(it) }
+
+        query.addPagingOptions(command.cursorId, command.limit)
+
+        return reactiveMongoTemplate.find(
+            query, Recipe::class.java
+        ).collectList().awaitSingle()
     }
 }

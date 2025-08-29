@@ -10,6 +10,9 @@ jobs:
   build-and-deploy:
     runs-on: self-hosted
 
+    env:
+      SERVICE_NAME: recipe
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,24 +25,13 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            TAG="prod"
-          else
-            TAG="dev"
-          fi
-          echo "Using tag: $TAG"
+          IMAGE_TAG=${{ github.sha }}
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/tsrecipe-${{ env.SERVICE_NAME }}
 
-          docker build \
-          --build-arg PROFILE=$TAG \
-          --build-arg MONGO_URL=${{ secrets.MONGO_URL }} \
-          --build-arg AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-          --build-arg AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-          --build-arg AWS_REGION=${{ secrets.AWS_REGION }} \
-          --build-arg AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
-          -t ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG \
-          .
-          
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_RECIPE }}:$TAG
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+          echo "IMAGE_TO_DEPLOY=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -50,8 +42,26 @@ jobs:
         env:
           KUBECONFIG_PATH: ./kubeconfig
         run: |
-          kubectl rollout restart deployment/recipe
-          kubectl rollout status deployment/recipe
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            PROFILE="prod"
+          else
+            PROFILE="dev"
+          fi
+          
+          sed -e "s|__PROFILE|$PROFILE|g" \
+              -e "s|__MONGO_URL|${{ secrets.PROFILE }}|g" \
+              -e "s|__AWS_ACCESS_KEY|${{ secrets.MONGO_URL }}|g" \
+              -e "s|__AWS_SECRET_KEY|${{ secrets.AWS_ACCESS_KEY }}|g" \
+              -e "s|__AWS_REGION|${{ secrets.AWS_SECRET_KEY }}|g" \
+              -e "s|__AWS_S3_BUCKET_NAME|${{ secrets.AWS_REGION }}|g" \
+              -e "s|__MEMBER_SERVICE_URL|${{ secrets.MEMBER_SERVICE_URL }}|g" \
+              k8s/secret.template.yaml | kubectl apply -f -
+          
+          sed -i "s|image: .*|image: ${{ env.IMAGE_TO_DEPLOY }}|g" k8s/${{ env.SERVICE_NAME }}.yaml
+          
+          kubectl apply -f k8s/${{ env.SERVICE_NAME }}.yaml
+          
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }}
 
       - name: Clean Up Docker Resources
         if: always()

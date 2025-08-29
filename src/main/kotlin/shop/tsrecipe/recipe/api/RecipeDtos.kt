@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive
 import org.bson.types.ObjectId
 import shop.tsrecipe.recipe.domain.IngredientUnit
 import shop.tsrecipe.recipe.service.*
+import java.util.*
 
 @Schema(description = "레시피 등록 RequestDTO")
 data class CreateRecipeRequest(
@@ -64,7 +65,7 @@ data class CreateRecipeRequest(
     ) {
         fun toCommandInfo(): IngredientInfo {
             return IngredientInfo(
-                name = this.name,
+                name = this.name.trim().lowercase(Locale.ENGLISH),
                 measurements = this.measurements.map { MeasurementInfo(it.amount, it.unit) }
             )
         }
@@ -179,8 +180,8 @@ data class ProcessResponse(
     val content: String
 )
 
-@Schema(description = "레시피 검색 상세 조건")
-data class RecipeSearchCondition(
+@Schema(description = "레시피 검색 필터")
+data class RecipeSearchFilter(
     @field:Min(value = 0, message = "비용은 0 이상이어야 합니다.")
     @field:Schema(description = "최소 비용")
     val costGte: Int? = null,

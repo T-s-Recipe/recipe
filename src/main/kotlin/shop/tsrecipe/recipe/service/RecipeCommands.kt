@@ -1,6 +1,7 @@
 package shop.tsrecipe.recipe.service
 
 import org.bson.types.ObjectId
+import org.springframework.data.mongodb.core.query.Criteria
 import shop.tsrecipe.recipe.domain.*
 
 data class CreateRecipeCommand(
@@ -68,3 +69,29 @@ data class GetRecentCommand(
     val limit: Int,
     val cursorId: ObjectId?
 )
+
+data class SearchRecipeCommand(
+    val authorId: ObjectId?,
+    val nickname: String?,
+    val searchKeyword: String?,
+    val costGte: Int?,
+    val costLte: Int?,
+    val cookingTimeGte: Int?,
+    val cookingTimeLte: Int?,
+    val limit: Int,
+    val cursorId: ObjectId?
+) {
+    fun toCriteria(): Criteria? {
+        val criteriaList = mutableListOf<Criteria>()
+
+        authorId?.let { criteriaList.add(Criteria.where("authorId").`is`(it)) }
+        nickname?.let { criteriaList.add(Criteria.where("authorNickname").`is`(it)) }
+
+        costGte?.let { criteriaList.add(Criteria.where("cost").gte(it)) }
+        costLte?.let { criteriaList.add(Criteria.where("cost").lte(it)) }
+        cookingTimeGte?.let { criteriaList.add(Criteria.where("cookingTime").gte(it)) }
+        cookingTimeLte?.let { criteriaList.add(Criteria.where("cookingTime").lte(it)) }
+
+        return if (criteriaList.isEmpty()) null else Criteria().andOperator(criteriaList)
+    }
+}

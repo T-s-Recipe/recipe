@@ -37,4 +37,8 @@ class RecipeService(
             GetRecentCommand(limit = limit, cursorId = cursorId?.let { ObjectId(it) })
         )
     }
+
+    suspend fun getRecipes(command: SearchRecipeCommand): List<Recipe> {
+        return recipeReader.findAllBySearchConditions(command)
+    }
 }
