@@ -6,6 +6,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URL}
+      auto-index-creation: true
     redis:
       repositories:
         enabled: false
@@ -20,7 +21,7 @@ springdoc:
     enabled: false
 
 external-service-url:
-  member: "http://member/members"
+  member: ${MEMBER_SERVICE_URL}
 
 resilience4j:
   circuitbreaker:

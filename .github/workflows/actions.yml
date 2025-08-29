@@ -54,6 +54,7 @@ jobs:
               -e "s|__AWS_SECRET_KEY|${{ secrets.AWS_ACCESS_KEY }}|g" \
               -e "s|__AWS_REGION|${{ secrets.AWS_SECRET_KEY }}|g" \
               -e "s|__AWS_S3_BUCKET_NAME|${{ secrets.AWS_REGION }}|g" \
+              -e "s|__MEMBER_SERVICE_URL|${{ secrets.MEMBER_SERVICE_URL }}|g" \
               k8s/secret.template.yaml | kubectl apply -f -
           
           sed -i "s|image: .*|image: ${{ env.IMAGE_TO_DEPLOY }}|g" k8s/${{ env.SERVICE_NAME }}.yaml
