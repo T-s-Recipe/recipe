@@ -1,6 +1,7 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
+	kotlin("kapt") version "1.9.25"
 	id("org.springframework.boot") version "3.5.0"
 	id("io.spring.dependency-management") version "1.1.7"
 }
@@ -38,6 +39,9 @@ dependencies {
 
 	implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 	implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+
+	kapt("org.springframework.boot:spring-boot-configuration-processor")
+	implementation("org.springframework.boot:spring-boot-configuration-processor")
 
 	implementation(platform("software.amazon.awssdk:bom:2.20.26"))
 	implementation("software.amazon.awssdk:s3")
