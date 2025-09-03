@@ -85,12 +85,12 @@ data class CreateRecipeRequest(
         val title: String,
 
         @field:Schema(description = "상세 과정 목록")
-        val process: List<ProcessRequest>,
+        val processes: List<ProcessRequest>,
     ) {
         fun toCommandInfo(): StepInfo {
             return StepInfo(
                 title = this.title,
-                steps = this.process.map { it.toCommandInfo() }
+                processes = this.processes.map { it.toCommandInfo() }
             )
         }
     }
@@ -171,7 +171,7 @@ data class StepResponse(
     val title: String,
 
     @field:Schema(description = "상세 과정 목록")
-    val steps: List<ProcessResponse>,
+    val processes: List<ProcessResponse>,
 )
 
 @Schema(description = "레시피 Step 과정 ResponseDTO")
