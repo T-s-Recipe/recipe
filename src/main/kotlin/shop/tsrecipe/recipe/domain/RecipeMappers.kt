@@ -58,7 +58,7 @@ fun Measurement.toResponse(): MeasurementResponse {
 fun Step.toResponse(): StepResponse {
     return StepResponse(
         title = this.title,
-        steps = this.processes.map { it.toResponse() },
+        processes = this.processes.map { it.toResponse() },
     )
 }
 

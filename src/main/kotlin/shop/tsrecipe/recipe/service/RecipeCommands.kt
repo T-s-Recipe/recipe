@@ -45,12 +45,12 @@ data class MeasurementInfo(
 
 data class StepInfo(
     val title: String,
-    val steps: List<ProcessInfo>
+    val processes: List<ProcessInfo>
 ) {
     fun toEntity(): Step {
         return Step(
             title = this.title,
-            processes = this.steps.map { it.toEntity() }
+            processes = this.processes.map { it.toEntity() }
         )
     }
 }
