@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.Positive
 import org.bson.types.ObjectId
 import shop.tsrecipe.recipe.domain.IngredientUnit
+import shop.tsrecipe.recipe.exception.BaseException
+import shop.tsrecipe.recipe.exception.ErrorCode
 import shop.tsrecipe.recipe.service.*
 import java.util.*
 
@@ -230,4 +232,44 @@ data class SimpleRecipeResponse(
 
     @field:Schema(description = "소요 시간 (분)")
     val cookingTime: Int?
+)
+
+@Schema(description = "S3 파일 업로드 URL RequestDTO")
+data class FileUploadRequest(
+    @field:Schema(description = "파일명")
+    val fileName: String,
+
+    @field:Schema(description = "ContentType (image/jpeg, image/png)")
+    val contentType: String
+)
+
+enum class ContentType(val value: String) {
+    JPEG("image/jpeg"),
+    PNG("image/png")
+    ;
+
+    companion object {
+        fun of(value: String): ContentType {
+            return when (value) {
+                JPEG.value -> JPEG
+                PNG.value -> PNG
+                else -> throw BaseException(ErrorCode.CONTENT_TYPE_INVALID)
+            }
+        }
+    }
+}
+
+@Schema(description = "S3 파일 업로드 URL ResponseDTO")
+data class FileUploadResponse(
+    @field:Schema(description = "S3 업로드 요청 URL")
+    val uploadUrl: String,
+
+    @field:Schema(description = "S3 FileKey")
+    val fileKey: String,
+
+    @field:Schema(description = "이미지 URL")
+    val imageUrl: String,
+
+    @field:Schema(description = "업로드 요청 헤더 (요청 헤더에 모두 필수로 포함되어야 함)")
+    val requiredHeaders: Map<String, String> = emptyMap()
 )

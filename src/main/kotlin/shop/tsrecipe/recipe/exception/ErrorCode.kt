@@ -15,5 +15,5 @@ enum class ErrorCode(val httpStatus: HttpStatusCode = HttpStatus.NOT_FOUND, val 
     MEMBER_NOT_FOUND(message = "Member not found"),
 
     // external
-    FILE_UPLOAD_FAILED(httpStatus = HttpStatus.INTERNAL_SERVER_ERROR, message = "File upload failed."),
+    CONTENT_TYPE_INVALID(httpStatus = HttpStatus.BAD_REQUEST, message = "Only image/jpeg and image/png are available.")
 }

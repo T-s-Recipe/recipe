@@ -1,63 +1,45 @@
 package shop.tsrecipe.recipe.external
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import shop.tsrecipe.recipe.exception.BaseException
-import shop.tsrecipe.recipe.exception.ErrorCode
-import software.amazon.awssdk.core.async.AsyncRequestBody
-import software.amazon.awssdk.services.s3.S3AsyncClient
+import shop.tsrecipe.recipe.api.ContentType
+import shop.tsrecipe.recipe.api.FileUploadResponse
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import java.nio.file.Files
-import java.nio.file.Path
+import software.amazon.awssdk.services.s3.presigner.S3Presigner
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest
+import java.time.Duration
 import java.util.*
 
 @Service
 class S3Service(
-    private val s3AsyncClient: S3AsyncClient,
-    @Value("\${aws.bucketName}") private val bucketName: String
+    private val s3Presigner: S3Presigner,
+    @Value("\${aws.bucketName}") private val bucketName: String,
+    @Value("\${aws.region}") private val region: String,
 ) {
-    suspend fun upload(file: FilePart): String {
-        val tempFile: Path = withContext(Dispatchers.IO) {
-            Files.createTempFile("s3-upload-", file.filename())
+    suspend fun getPresignedUrl(fileName: String, contentType: ContentType): FileUploadResponse {
+        val sanitizedFilename = fileName.sanitizeFileName()
+        val fileKey = "${UUID.randomUUID()}-${sanitizedFilename}"
+
+        val putObjectRequest = PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(fileKey)
+            .contentType(contentType.value)
+            .build()
+
+        val presignedRequest: PresignedPutObjectRequest = s3Presigner.presignPutObject {
+            it.putObjectRequest(putObjectRequest)
+                .signatureDuration(Duration.ofMinutes(5))
         }
 
-        try {
-            file.transferTo(tempFile).awaitFirstOrNull()
+        val signedHeaders: Map<String, String> =
+            presignedRequest.httpRequest().headers().mapValues { it.value.joinToString(",") }
 
-            val fileLength = withContext(Dispatchers.IO) {
-                Files.size(tempFile)
-            }
-
-            val sanitizedFilename = file.filename().sanitizeFileName()
-            val fileKey = "${UUID.randomUUID()}-${sanitizedFilename}"
-
-            val putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileKey)
-                .contentType(file.headers().contentType?.toString())
-                .contentLength(fileLength)
-                .build()
-
-            val requestBody = AsyncRequestBody.fromFile(tempFile)
-
-            s3AsyncClient.putObject(putObjectRequest, requestBody).await()
-
-            return s3AsyncClient.utilities().getUrl { builder -> builder.bucket(bucketName).key(fileKey) }.toExternalForm()
-
-        } finally {
-            try {
-                withContext(Dispatchers.IO) {
-                    Files.deleteIfExists(tempFile)
-                }
-            } catch (e: Exception) {
-                throw BaseException(ErrorCode.FILE_UPLOAD_FAILED)
-            }
-        }
+        return FileUploadResponse(
+            uploadUrl = presignedRequest.url().toString(),
+            fileKey = fileKey,
+            imageUrl = "https://$bucketName.s3.$region.amazonaws.com/$fileKey",
+            requiredHeaders = signedHeaders,
+        )
     }
 
     fun String.sanitizeFileName(): String {

@@ -5,9 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.bson.types.ObjectId
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 import shop.tsrecipe.recipe.domain.toResponse
 import shop.tsrecipe.recipe.domain.toSliceResponse
@@ -37,13 +35,13 @@ class RecipeController(
     }
 
     @Operation(
-        summary = "이미지 업로드",
-        description = "이미지 파일을 S3 서비스에 업로드"
+        summary = "파일 업로드 URL 요청",
+        description = "S3에 업로드할 수 있는 URL을 반환"
     )
-    @PostMapping(value = ["/image-upload"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    suspend fun uploadImage(@RequestPart imageFile: FilePart): ResponseEntity<String> {
+    @PostMapping("/file-upload")
+    suspend fun upload(@RequestBody request: FileUploadRequest): ResponseEntity<FileUploadResponse> {
         return baseResponse(
-            body = s3Service.upload(imageFile)
+            body = s3Service.getPresignedUrl(request.fileName, ContentType.of(request.contentType))
         )
     }
 
