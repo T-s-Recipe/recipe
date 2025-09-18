@@ -212,6 +212,9 @@ data class RecipeSliceResponse(
 
 @Schema(description = "레시피 기본 정보 ResponseDTO")
 data class SimpleRecipeResponse(
+    @field:Schema(description = "레시피 ID")
+    val recipeId: String,
+
     @field:Schema(description = "레시피 등록 회원 ID")
     val authorId: String,
 

@@ -31,6 +31,7 @@ fun List<Recipe>.toSliceResponse(): RecipeSliceResponse {
 
 fun Recipe.toSimpleResponse(): SimpleRecipeResponse {
     return SimpleRecipeResponse(
+        recipeId = this.id.toString(),
         authorId = this.authorId.toString(),
         authorName = this.authorNickname,
         imageUrl = this.imageUrl,
