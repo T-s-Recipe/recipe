@@ -7,6 +7,7 @@ import jakarta.validation.Valid
 import org.bson.types.ObjectId
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import shop.tsrecipe.recipe.annotation.MemberId
 import shop.tsrecipe.recipe.domain.toResponse
 import shop.tsrecipe.recipe.domain.toSliceResponse
 import shop.tsrecipe.recipe.external.S3Service
@@ -27,11 +28,43 @@ class RecipeController(
     )
     @PostMapping
     suspend fun generate(
+        @MemberId memberId: ObjectId,
         @RequestBody request: CreateRecipeRequest
     ): ResponseEntity<RecipeResponse> {
         return baseResponse(
-            body = recipeService.create(command = request.toCommand()).toResponse()
+            body = recipeService.create(command = request.toCommand(memberId)).toResponse()
         )
+    }
+
+    @Operation(
+        summary = "레시피 수정",
+        description = "레시피 수정 API"
+    )
+    @PatchMapping("/{recipeId}")
+    suspend fun update(
+        @MemberId memberId: ObjectId,
+        @PathVariable recipeId: String,
+        @RequestBody request: UpdateRecipeRequest
+    ): ResponseEntity<RecipeResponse> {
+        return baseResponse(
+            body = recipeService.update(
+                memberId = memberId,
+                command = request.toCommand(recipeId)
+            ).toResponse()
+        )
+    }
+
+    @Operation(
+        summary = "레시피 삭제",
+        description = "레시피 삭제 API"
+    )
+    @DeleteMapping("/{recipeId}")
+    suspend fun delete(
+        @MemberId memberId: ObjectId,
+        @PathVariable recipeId: String
+    ): ResponseEntity<Void> {
+        recipeService.delete(memberId = memberId, recipeId = ObjectId(recipeId))
+        return ResponseEntity.noContent().build()
     }
 
     @Operation(

@@ -24,6 +24,26 @@ class RecipeService(
         return recipeManager.create(command)
     }
 
+    suspend fun update(
+        memberId: ObjectId,
+        command: UpdateRecipeCommand
+    ): Recipe {
+        val recipe = getRecipe(command.recipeId)
+        if (recipe.authorId != memberId) throw BaseException(ErrorCode.AUTHOR_ID_MISMATCH)
+
+        return recipeManager.update(command)
+    }
+
+    suspend fun delete(
+        memberId: ObjectId,
+        recipeId: ObjectId
+    ) {
+        val recipe = getRecipe(recipeId)
+        if (recipe.authorId != memberId) throw BaseException(ErrorCode.AUTHOR_ID_MISMATCH)
+
+        recipeManager.delete(recipeId)
+    }
+
     private suspend fun getMember(authorId: String): MemberResponse? {
         return memberService.getMemberById(authorId)
     }

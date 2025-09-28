@@ -12,9 +12,6 @@ import java.util.*
 
 @Schema(description = "레시피 등록 RequestDTO")
 data class CreateRecipeRequest(
-    @field:Schema(description = "레시피 등록 회원 ID")
-    val authorId: String,
-
     @field:Schema(description = "레시피 제목")
     val title: String,
 
@@ -27,7 +24,7 @@ data class CreateRecipeRequest(
     @field:Schema(description = "비용")
     val cost: Int? = null,
 
-    @field:Schema(description = "소요 시간 (분)")
+    @field:Schema(description = "요리 소요 시간 (분)")
     val cookingTime: Int? = null,
 
     @field:Schema(description = "메모")
@@ -42,9 +39,9 @@ data class CreateRecipeRequest(
     @field:Schema(description = "요리 단계 목록")
     val steps: List<StepRequest>,
 ) {
-    fun toCommand(): CreateRecipeCommand {
+    fun toCommand(memberId: ObjectId): CreateRecipeCommand {
         return CreateRecipeCommand(
-            authorId = ObjectId(this.authorId),
+            authorId = memberId,
             title = this.title,
             imageUrl = this.imageUrl,
             servings = this.servings,
@@ -56,57 +53,57 @@ data class CreateRecipeRequest(
             steps = this.steps.map { it.toCommandInfo() }
         )
     }
+}
 
-    @Schema(description = "기본 재료 RequestDTO")
-    data class IngredientRequest(
-        @field:Schema(description = "재료 이름")
-        val name: String,
+@Schema(description = "기본 재료 RequestDTO")
+data class IngredientRequest(
+    @field:Schema(description = "재료 이름")
+    val name: String,
 
-        @field:Schema(description = "재료 용량 상세")
-        val measurements: List<MeasurementRequest>
-    ) {
-        fun toCommandInfo(): IngredientInfo {
-            return IngredientInfo(
-                name = this.name.trim().lowercase(Locale.ENGLISH),
-                measurements = this.measurements.map { MeasurementInfo(it.amount, it.unit) }
-            )
-        }
+    @field:Schema(description = "재료 용량 상세")
+    val measurements: List<MeasurementRequest>
+) {
+    fun toCommandInfo(): IngredientInfo {
+        return IngredientInfo(
+            name = this.name.trim().lowercase(Locale.ENGLISH),
+            measurements = this.measurements.map { MeasurementInfo(it.amount, it.unit) }
+        )
     }
+}
 
-    data class MeasurementRequest(
-        @field:Schema(description = "양")
-        val amount: Int,
+data class MeasurementRequest(
+    @field:Schema(description = "양")
+    val amount: Int,
 
-        @field:Schema(description = "단위 (QUANTITY / GRAM / / MILLILITER / TABLESPOON / TEASPOON / CUP / OZ")
-        val unit: IngredientUnit
-    )
+    @field:Schema(description = "단위 (QUANTITY / GRAM / / MILLILITER / TABLESPOON / TEASPOON / CUP / OZ")
+    val unit: IngredientUnit
+)
 
-    @Schema(description = "레시피 Step RequestDTO")
-    data class StepRequest(
-        @field:Schema(description = "제목")
-        val title: String,
+@Schema(description = "레시피 Step RequestDTO")
+data class StepRequest(
+    @field:Schema(description = "제목")
+    val title: String,
 
-        @field:Schema(description = "상세 과정 목록")
-        val processes: List<ProcessRequest>,
-    ) {
-        fun toCommandInfo(): StepInfo {
-            return StepInfo(
-                title = this.title,
-                processes = this.processes.map { it.toCommandInfo() }
-            )
-        }
+    @field:Schema(description = "상세 과정 목록")
+    val processes: List<ProcessRequest>,
+) {
+    fun toCommandInfo(): StepInfo {
+        return StepInfo(
+            title = this.title,
+            processes = this.processes.map { it.toCommandInfo() }
+        )
     }
+}
 
-    @Schema(description = "레시피 Step 상세 과정")
-    data class ProcessRequest(
-        @field:Schema(description = "과정 내용")
-        val content: String
-    ) {
-        fun toCommandInfo(): ProcessInfo {
-            return ProcessInfo(
-                content = this.content
-            )
-        }
+@Schema(description = "레시피 Step 상세 과정")
+data class ProcessRequest(
+    @field:Schema(description = "과정 내용")
+    val content: String
+) {
+    fun toCommandInfo(): ProcessInfo {
+        return ProcessInfo(
+            content = this.content
+        )
     }
 }
 
@@ -180,6 +177,55 @@ data class StepResponse(
 data class ProcessResponse(
     @field:Schema(description = "내용")
     val content: String
+)
+
+data class UpdateRecipeRequest(
+    @field:Schema(description = "레시피 제목")
+    val title: String? = null,
+
+    @field:Schema(description = "이미지 URL")
+    val imageUrl: String? = null,
+
+    @field:Schema(description = "용량")
+    val servings: Int? = null,
+
+    @field:Schema(description = "비용")
+    val cost: Int? = null,
+
+    @field:Schema(description = "요리 소요 시간 (분)")
+    val cookingTime: Int? = null,
+
+    @field:Schema(description = "메모")
+    val memo: String? = null,
+
+    @field:Schema(description = "기본 재료")
+    val basicIngredients: List<IngredientRequest>? = null,
+
+    @field:Schema(description = "소스 재료")
+    val sourceIngredients: List<IngredientRequest>? = null,
+
+    @field:Schema(description = "요리 단계 목록")
+    val steps: List<StepRequest>? = null
+) {
+    fun toCommand(recipeId: String): UpdateRecipeCommand {
+        return UpdateRecipeCommand(
+            recipeId = ObjectId(recipeId),
+            title = this.title,
+            imageUrl = this.imageUrl,
+            servings = this.servings,
+            cost = this.cost,
+            cookingTime = this.cookingTime,
+            memo = this.memo,
+            basicIngredients = this.basicIngredients?.map { it.toCommandInfo() },
+            sourceIngredients = this.sourceIngredients?.map { it.toCommandInfo() },
+            steps = this.steps?.map { it.toCommandInfo() }
+        )
+    }
+}
+
+data class DeleteRecipeRequest(
+    @field:Schema(description = "레시피 ID")
+    val recipeId: String
 )
 
 @Schema(description = "레시피 검색 필터")

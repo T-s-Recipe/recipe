@@ -65,6 +65,19 @@ data class ProcessInfo(
     }
 }
 
+data class UpdateRecipeCommand(
+    val recipeId: ObjectId,
+    val title: String?,
+    val imageUrl: String?,
+    val servings: Int?,
+    val cost: Int?,
+    val cookingTime: Int?,
+    val memo: String?,
+    val basicIngredients: List<IngredientInfo>?,
+    val sourceIngredients: List<IngredientInfo>?,
+    val steps: List<StepInfo>?
+)
+
 data class GetRecentCommand(
     val limit: Int,
     val cursorId: ObjectId?

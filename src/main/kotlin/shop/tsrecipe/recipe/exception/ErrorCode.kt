@@ -10,10 +10,12 @@ enum class ErrorCode(val httpStatus: HttpStatusCode = HttpStatus.NOT_FOUND, val 
     // recipe
     RECIPE_NOT_FOUND(message = "Recipe not found."),
     RECIPE_CREATE_FAILED(httpStatus = HttpStatus.INTERNAL_SERVER_ERROR, message = "Recipe create failed."),
+    AUTHOR_ID_MISMATCH(httpStatus = HttpStatus.FORBIDDEN, message = "Author ID does not match."),
 
     // member
     MEMBER_NOT_FOUND(message = "Member not found"),
 
     // external
-    CONTENT_TYPE_INVALID(httpStatus = HttpStatus.BAD_REQUEST, message = "Only image/jpeg and image/png are available.")
+    CONTENT_TYPE_INVALID(httpStatus = HttpStatus.BAD_REQUEST, message = "Only image/jpeg and image/png are available."),
+    MEMBER_HEADER_MISSING(httpStatus = HttpStatus.BAD_REQUEST, message = "X_MEMBER_ID header is missing."),
 }
