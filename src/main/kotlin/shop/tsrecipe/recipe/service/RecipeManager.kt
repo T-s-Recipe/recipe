@@ -55,6 +55,6 @@ class RecipeManager(
     }
 
     suspend fun delete(recipeId: ObjectId) {
-        recipeRepository.deleteById(recipeId)
+        recipeRepository.deleteById(recipeId).awaitSingle()
     }
 }
